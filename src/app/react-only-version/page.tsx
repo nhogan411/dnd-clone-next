@@ -25,15 +25,15 @@ function App() {
  * This function will accept the initial state as an argument.
  */
 
-const setupInitialGameState = (initialGameState) => {
+const setupInitialGameState = (initialGameState: any) => {
 	// console.log(`initialGameState: `, initialGameState);
 
 	// Get the characters array out of the initialGameState, roll for initiative,
 	// add dexterityMod and assign to the characters initiative value.
 	// Then sort the characters array based on those initiative values.
 	const characterWithInitiativeSorted = initialGameState.characters
-		.map((character) => {
-			const initiativeRoll = parseInt(util.rollDice(1, 20));
+		.map((character: any) => {
+			const initiativeRoll: number[] = parseInt(util.rollDice(1, 20));
 			const initiativeWithDexMod = initiativeRoll + character.dexterityMod;
 			return {
 				...character,

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import Script from 'next/script';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -23,10 +24,11 @@ export default function RootLayout({
 					rel='stylesheet'
 					type='text/css'
 				/>
-				<script
+				<Script
+					defer
 					src='https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js'
 					type='text/javascript'
-				></script>
+				></Script>
 			</head>
 			<body className={inter.className}>{children}</body>
 		</html>
