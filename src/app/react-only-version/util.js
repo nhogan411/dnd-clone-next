@@ -175,3 +175,7 @@ export const maxNum = (number, ceil = 0) => {
  * of the reducer function.
  */
 export const clone = (x) => JSON.parse(JSON.stringify(x));
+
+export const onlyUnique = (value, index, array) => {
+	return array.indexOf(value) === index;
+};

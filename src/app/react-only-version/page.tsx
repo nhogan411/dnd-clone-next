@@ -33,14 +33,14 @@ const setupInitialGameState = (initialGameState: any) => {
 	// Then sort the characters array based on those initiative values.
 	const characterWithInitiativeSorted = initialGameState.characters
 		.map((character: any) => {
-			const initiativeRoll: number[] = parseInt(util.rollDice(1, 20));
+			const initiativeRoll = Number(util.rollDice(1, 20));
 			const initiativeWithDexMod = initiativeRoll + character.dexterityMod;
 			return {
 				...character,
 				initiative: initiativeWithDexMod,
 			};
 		})
-		.sort((a, b) => b.initiative - a.initiative);
+		.sort((a: any, b: any) => b.initiative - a.initiative);
 
 	// console.log(`characterWithInitiativeSorted: `, characterWithInitiativeSorted);
 
@@ -63,7 +63,7 @@ const setupInitialGameState = (initialGameState: any) => {
 	// but not for Weapon and Armor objects.
 	// TODO: Fix for Weapon and Armor objects
 	newInitialGameState.characters = newInitialGameState.characters.map(
-		(character) => new Character(character.id, character.name, { ...character }),
+		(character: any) => new Character(character.id, character.name, { ...character }),
 	);
 
 	return newInitialGameState;
@@ -79,7 +79,7 @@ const setupInitialGameState = (initialGameState: any) => {
  * gameStateReducer returns the new state, it does NOT mutate the current state.
  * It needs to return a new game state object.
  */
-const gameStateReducer = (state, action) => {
+const gameStateReducer = (state: any, action: any) => {
 	// Clone the current game state so we can modify it and return the modified version.
 	const nextState = util.clone(state);
 	console.log(`nextState: `, nextState);
@@ -95,7 +95,7 @@ const gameStateReducer = (state, action) => {
 	// but not for Weapon and Armor objects.
 	// TODO: Fix for Weapon and Armor objects
 	nextState.characters = nextState.characters.map(
-		(character) => new Character(character.id, character.name, { ...character }),
+		(character: any) => new Character(character.id, character.name, { ...character }),
 	);
 
 	console.log(`nextState: `, nextState);
@@ -108,7 +108,7 @@ const gameStateReducer = (state, action) => {
 	 * Then it overwrites the old actionLog, passing in the new message
 	 * before then adding all the old messages.
 	 */
-	const updateActionLog = (newActionLogMessage) => {
+	const updateActionLog = (newActionLogMessage: any) => {
 		nextState.actionLog = [`${newActionLogMessage}`, ...nextState.actionLog];
 	};
 
@@ -128,26 +128,27 @@ const gameStateReducer = (state, action) => {
 		// most efficient way to accomplish this?
 		//
 		// This will get us an array of all gameState.characters.playerIds (not unique)
-		const playerIds = nextState.characters.map((character) => character.playerId);
+		const playerIds = nextState.characters.map((character: any) => character.playerId);
 		// This gets us an array of unique character.playerIds
-		const uniquePlayerIds = [...new Set(playerIds)];
+		const uniquePlayerIds = playerIds.filter(util.onlyUnique);
+		// const uniquePlayerIds = [...new Set(playerIds)];
 		// console.log(`uniquePlayerIds: `, uniquePlayerIds);
 
 		// This should give us an array of boolean values that indicates if
 		// every character associated with a playerId is unconscious or not
-		const everyCharacterPerPlayerIdUnconscious = uniquePlayerIds.map((playerId) => {
+		const everyCharacterPerPlayerIdUnconscious = uniquePlayerIds.map((playerId: any) => {
 			return nextState.characters
-				.filter((character) => character.playerId === playerId)
-				.every((character) => character.status.includes('unconscious'));
+				.filter((character: any) => character.playerId === playerId)
+				.every((character: any) => character.status.includes('unconscious'));
 		});
 
-		return everyCharacterPerPlayerIdUnconscious.some((teamUnconscious) => teamUnconscious);
+		return everyCharacterPerPlayerIdUnconscious.some((teamUnconscious: any) => teamUnconscious);
 	};
 
 	/**
 	 * The nextTurn function is going to cycle the currentPlayerIndex to the next character
 	 */
-	const nextTurn = (currentPlayerIndex) => {
+	const nextTurn = (currentPlayerIndex: any) => {
 		return (currentPlayerIndex + 1) % nextState.characters.length;
 	};
 
@@ -163,14 +164,14 @@ const gameStateReducer = (state, action) => {
 		const { act, actorID, targetID } = action;
 		console.log(`act: `, act);
 
-		const actor = nextState.characters.find((char) => char.id === actorID);
-		const actorIndex = nextState.characters.findIndex((char) => char.id === actorID);
+		const actor = nextState.characters.find((char: any) => char.id === actorID);
+		const actorIndex = nextState.characters.findIndex((char: any) => char.id === actorID);
 		console.log(`actorID: `, actorID);
 		console.log(`actor: `, actor);
 		console.log(`actorIndex: `, actorIndex);
 
-		const target = nextState.characters.find((char) => char.id === parseInt(targetID));
-		const targetIndex = nextState.characters.findIndex((char) => char.id === parseInt(targetID));
+		const target = nextState.characters.find((char: any) => char.id === parseInt(targetID));
+		const targetIndex = nextState.characters.findIndex((char: any) => char.id === parseInt(targetID));
 		console.log(`targetID: `, targetID);
 		console.log(`target: `, target);
 		console.log(`targetIndex: `, targetIndex);
@@ -195,7 +196,7 @@ const gameStateReducer = (state, action) => {
 			// attackCheck is a dice roll from 1-20 that will (after adding the
 			// actor.strengthMod) be compared against the target.armorClass to determine
 			// whether attack was successful or not.
-			const attackCheck = parseInt(util.rollDice(1, 20));
+			const attackCheck = Number(util.rollDice(1, 20));
 			// attackCheck adds the actor.strengthMod to attackCheck.
 			const attackCheckWithMod = util.minNum(attackCheck + actor.strengthMod);
 			// initialize the attackDamageRoll variable.
@@ -223,14 +224,14 @@ const gameStateReducer = (state, action) => {
 				// If the attack is critical, then we roll 2d instead of 1
 				if (criticalFlag) {
 					updateActionLog(`${actor.name}'s attack was critical!`);
-					attackDamageRoll = parseInt(
+					attackDamageRoll = Number(
 						util.sumDiceRolls(2 * actor.weapons.damageDiceQuantity, actor.weapons.damageDiceSize),
 					);
 				}
 				// The attack was not critical, so roll 1d.
 				else {
 					updateActionLog(`${actor.name}'s attack was successful.`);
-					attackDamageRoll = parseInt(util.rollDice(actor.weapons.damageDiceQuantity, actor.weapons.damageDiceSize));
+					attackDamageRoll = Number(util.rollDice(actor.weapons.damageDiceQuantity, actor.weapons.damageDiceSize));
 				}
 
 				updateActionLog(`${actor.name}'s attack damage roll was ${attackDamageRoll}.`);
@@ -266,7 +267,7 @@ const gameStateReducer = (state, action) => {
 			updateActionLog(`${actor.name} uses potion of healing.`);
 
 			// Roll 2d4 to determine initial heal amount
-			const healRoll = parseInt(util.sumDiceRolls(2, 4));
+			const healRoll = Number(util.sumDiceRolls(2, 4));
 			// Potion of healing is 2d4 + 2 so here we're adding the extra 2.
 			const healAmount = healRoll + 2;
 
@@ -320,13 +321,13 @@ function Game() {
 				// chars.ben,
 				// chars.nick,
 				// chars.michelle,
-				// chars.nightcrawler,
-				// chars.wolverine,
+				chars.nightcrawler,
+				chars.wolverine,
 				// chars.x23,
-				// chars.sabretooth,
-				// chars.juggernaut,
+				chars.sabretooth,
+				chars.juggernaut,
 				// chars.bishop,
-				// chars.magneto,
+				chars.magneto,
 			],
 		},
 		setupInitialGameState,
@@ -342,7 +343,7 @@ function Game() {
 	 * actor is the ID of the Character taking action this turn.
 	 * target is the ID of the Character on the receiving end of the action.
 	 */
-	const actionHandler = async (act, actorID, targetID) => {
+	const actionHandler = async (act: any, actorID: any, targetID: any) => {
 		console.log(`act: `, act);
 		console.log(`actorID: `, actorID);
 		console.log(`targetID: `, targetID);
@@ -353,7 +354,7 @@ function Game() {
 		await dispatchGameState({ type: 'START_GAME' });
 	};
 
-	let turnComponent = '';
+	let turnComponent: any = '';
 	if (gameStatus === 'preGame') {
 		turnComponent = (
 			<button
@@ -394,9 +395,9 @@ function Game() {
 				<div className='col-4 bg-light'>
 					<div className='row'>
 						{characters
-							.filter((character) => character.playerId === 1)
-							.sort((a, b) => a.id - b.id)
-							.map((character) => {
+							.filter((character: any) => character.playerId === 1)
+							.sort((a: any, b: any) => a.id - b.id)
+							.map((character: any) => {
 								console.log(`character: `, character);
 								return (
 									<CharacterBattleData
@@ -418,7 +419,7 @@ function Game() {
 
 					<div style={{ height: '75cqh', overflow: 'scroll' }}>
 						{actionLog && actionLog.length > 0 ? (
-							actionLog.map((entry, index) => (
+							actionLog.map((entry: any, index: any) => (
 								<p
 									className='small'
 									style={{ marginBottom: '4px' }}
@@ -436,9 +437,9 @@ function Game() {
 				<div className='col-4 bg-dark text-light'>
 					<div className='row'>
 						{characters
-							.filter((character) => character.playerId === 0)
-							.sort((a, b) => a.id - b.id)
-							.map((character) => {
+							.filter((character: any) => character.playerId === 0)
+							.sort((a: any, b: any) => a.id - b.id)
+							.map((character: any) => {
 								console.log(`character: `, character);
 								return (
 									<CharacterBattleData
@@ -454,16 +455,16 @@ function Game() {
 	);
 }
 
-const TurnComponent = (props) => {
+const TurnComponent = (props: any) => {
 	const { characters, currentPlayerIndex } = props;
 	const currentPlayer = characters[currentPlayerIndex];
-	const currentPlayersTeam = characters.filter((character) => currentPlayer.playerId === character.playerId);
-	const oppositionTeam = characters.filter((character) => currentPlayer.playerId !== character.playerId);
+	const currentPlayersTeam = characters.filter((character: any) => currentPlayer.playerId === character.playerId);
+	const oppositionTeam = characters.filter((character: any) => currentPlayer.playerId !== character.playerId);
 	// const charactersAlive = characters.filter( character => !character.status.includes('dead') );
-	const selectedAct = useRef('DEFAULT');
-	const selectedTargetId = useRef('DEFAULT');
+	const selectedAct: any = useRef('DEFAULT');
+	const selectedTargetId: any = useRef('DEFAULT');
 	const [targetOptions, setTargetOptions] = useState(
-		characters.map((char) => (
+		characters.map((char: any) => (
 			<option
 				key={char.id}
 				value={char.id}
@@ -484,7 +485,7 @@ const TurnComponent = (props) => {
 	const actChangeHandler = () => {
 		if (selectedAct.current.value === 'attack') {
 			setTargetOptions(
-				oppositionTeam.map((char) => (
+				oppositionTeam.map((char: any) => (
 					<option
 						key={char.id}
 						value={char.id}
@@ -495,7 +496,7 @@ const TurnComponent = (props) => {
 			);
 		} else if (selectedAct.current.value === 'heal') {
 			setTargetOptions(
-				currentPlayersTeam.map((char) => (
+				currentPlayersTeam.map((char: any) => (
 					<option
 						key={char.id}
 						value={char.id}
@@ -508,7 +509,7 @@ const TurnComponent = (props) => {
 		// console.log(`targetOptions: `, targetOptions);
 	};
 
-	const actionButtonHandler = (event) => {
+	const actionButtonHandler = (event: any) => {
 		event.preventDefault();
 
 		// console.log(`selectedAct.current.value: `, selectedAct.current.value);
@@ -565,7 +566,7 @@ const TurnComponent = (props) => {
 	);
 };
 
-const CharacterBattleData = (props) => {
+const CharacterBattleData = (props: any) => {
 	// Pull character data out of props into it's own variable.
 	const character = props.character;
 
