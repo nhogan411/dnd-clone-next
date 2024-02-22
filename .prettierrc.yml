@@ -1,0 +1,11 @@
+# pull config options from EditorConfig
+editorconfig: true
+semi: true
+singleQuote: true
+jsxSingleQuote: true
+trailingComma: 'all'
+bracketSpacing: true
+bracketSameLine: false
+arrowParens: 'always'
+singleAttributePerLine: true
+printWidth: 120
